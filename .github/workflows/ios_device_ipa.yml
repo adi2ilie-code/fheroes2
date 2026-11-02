@@ -1,0 +1,54 @@
+name: iOS Device IPA Candidate
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ios-device:
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Xcode version
+        run: /usr/bin/xcodebuild -version
+
+      - name: Install dependencies
+        run: ./script/ios/install_packages.sh
+
+      - name: Prepare resource folders
+        run: |
+          mkdir -p anim
+          mkdir -p data
+          mkdir -p music
+          mkdir -p maps
+
+      - name: Build unsigned app for real iOS device
+        run: |
+          cd ios
+          xcodebuild \
+            -project fheroes2.xcodeproj \
+            -scheme fheroes2 \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            DEVELOPMENT_TEAM=""
+
+      - name: Package unsigned IPA
+        run: |
+          APP="$RUNNER_TEMP/DerivedData/Build/Products/Release-iphoneos/fheroes2.app"
+          test -d "$APP"
+          mkdir -p "$RUNNER_TEMP/Payload"
+          cp -R "$APP" "$RUNNER_TEMP/Payload/"
+          cd "$RUNNER_TEMP"
+          zip -qry fheroes2-unsigned.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fheroes2-ios-device-unsigned
+          path: ${{ runner.temp }}/fheroes2-unsigned.ipa

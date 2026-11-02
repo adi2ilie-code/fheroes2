@@ -24,10 +24,10 @@ jobs:
           mkdir -p music
           mkdir -p maps
 
-      - name: Exclude macOS SDL source from iOS build
+      - name: Inspect SDL project reference
         run: |
-          rm -f ios/SDL2/src/misc/macosx/SDL_sysurl.m
-          
+           grep -n "SDL_sysurl.m" ios/SDL2/Xcode/SDL/SDL.xcodeproj/project.pbxproj
+
       - name: Build unsigned app for real iOS device
         run: |
           cd ios

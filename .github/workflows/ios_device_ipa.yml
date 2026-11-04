@@ -24,10 +24,9 @@ jobs:
           mkdir -p music
           mkdir -p maps
 
-      - name: Inspect SDL project reference
+      - name: Inspect SDL Framework source membership
         run: |
-           grep -n "SDL_sysurl.m" ios/SDL2/Xcode/SDL/SDL.xcodeproj/project.pbxproj
-
+          grep -n -B 12 -A 12 "F3ADAB8E2576F0B400A6B1D9" ios/SDL2/Xcode/SDL/SDL.xcodeproj/project.pbxproj
       - name: Build unsigned app for real iOS device
         run: |
           cd ios
